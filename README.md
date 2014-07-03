@@ -25,7 +25,7 @@ Or install it yourself as:
 ```
 use Rack::Session::Redis::SessionService, 
     key: 'my_session_key',
-    domain: 'example.com'
+    domain: 'example.com',
     path: '/',
     expire_after: 3600,
     redis_options: {host: 'redis-master.example.com', port: 6379, db: 13},
