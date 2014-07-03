@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'rack/session/redis/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "rack-session-redis"
+  spec.name          = "loveos-rack-session-redis"
   spec.version       = Rack::Session::Redis::VERSION
   spec.authors       = ["Adrian Wolny"]
   spec.email         = ["adrian.wolny@yahoo.com"]
