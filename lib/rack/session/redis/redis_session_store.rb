@@ -10,8 +10,8 @@ module Rack
         # @param [Hash] options
         def initialize(options)
           raise ArgumentError, 'No :default_expiration value provided' unless options[:default_expiration]
-          @default_expiration = options.delete(:default_expiration)
-          @key_prefix = options.delete(:key_prefix) || ''
+          @default_expiration = options[:default_expiration]
+          @key_prefix = options[:key_prefix] || ''
           @redis = ::Redis.new(options)
         end
 
@@ -67,8 +67,9 @@ module Rack
         # @param [String] key
         # @return [String] deleted value or nil if key doesn't exist
         def invalidate(key)
-          if value = @redis.get(key)
-            @redis.del(key)
+          redis_key = prefix(key)
+          if value = @redis.get(redis_key)
+            @redis.del(redis_key)
             Marshal.load(value)
           end
         end

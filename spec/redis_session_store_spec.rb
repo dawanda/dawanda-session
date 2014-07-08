@@ -35,17 +35,23 @@ describe Rack::Session::Redis::RedisSessionStore do
     expect { Rack::Session::Redis::RedisSessionStore.new({}) }.to raise_error ArgumentError
   end
 
-  it 'should invoke redis.exists? with a prefix specified in a RedisSessionStore' do
+  it 'should invoke redis.exists with a prefix' do
     expect(redis).to receive(:exists).with(PREFIX + key)
     expect(store.exists?(key)).to be_falsey
   end
 
-  it 'should invoke redis.get with a prefix specified in a RedisSessionStore and returned unmarshalled value' do
+  it 'should invoke redis.get with a prefix and return unmarshalled value' do
     expect(redis).to receive(:get).with(PREFIX + key)
     expect(store.load(key)).to eq(value)
   end
 
-  it 'should invoke redis.setnx with a prefix specified in a RedisSessionStore' do
+  it 'should invoke get/del with a prefix when invalidating the key' do
+    expect(redis).to receive(:get).with(PREFIX + key)
+    expect(redis).to receive(:del).with(PREFIX + key)
+    store.invalidate(key)
+  end
+
+  it 'should invoke redis.setnx with a prefix' do
     expect(redis).to receive(:setnx).with(PREFIX + key, Marshal.dump(value))
     expect(store.create(key, value)).to be_truthy
   end
@@ -62,7 +68,7 @@ describe Rack::Session::Redis::RedisSessionStore do
     store.create(key, value)
   end
 
-  it 'should ivoke redis.set instead of redis.setex if the expiration is less than or equal 0 (meaning no expiration)' do
+  it 'should invoke redis.set instead of redis.setex if the expiration is less than or equal 0 (meaning no expiration)' do
     expect(redis).to receive(:set).with(PREFIX + key, Marshal.dump(value))
     store.store(key, value, expire_after: 0)
   end
