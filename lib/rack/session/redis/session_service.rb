@@ -24,6 +24,9 @@ module Rack
         # default session expiration time
         DEFAULT_EXPIRATION_SEC = 60 * 60
 
+        # sid key name which stores the session id inside a session object; backward compatibility with identity
+        DAWANDA_SID = '_dawanda_sid'
+
         def initialize(app, options = {})
           super
           redis_options = options[:redis_options] || {}
@@ -53,6 +56,7 @@ module Rack
 
         #override
         def set_session(env, sid, session, options)
+          session[DAWANDA_SID] = sid
           @store.store(sid, session, options)
           sid
         end
