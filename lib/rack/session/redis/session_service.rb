@@ -54,7 +54,7 @@ module Rack
         #override
         def set_session(env, sid, session, options)
           #TODO: sid key name which stores the session id inside a session object; backward compatibility with identity
-          session[:_dawanda_sid] = sid
+          session[:_dawanda_sid] = sid unless session.empty?
           @store.store(sid, session, options)
           sid
         end
