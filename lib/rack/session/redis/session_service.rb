@@ -33,12 +33,6 @@ module Rack
           @store = Rack::Session::Redis::RedisSessionStore.new(redis_options)
         end
 
-        # Override call in order to provide your own domain extraction logic
-        def call(env)
-          env['rack.session.options'][:domain] = get_domain_from_host(env)
-          super env
-        end
-
         def generate_sid
           loop do
             sid = super
@@ -69,21 +63,6 @@ module Rack
         def destroy_session(env, sid, options)
           @store.invalidate(sid)
           generate_sid unless options[:drop]
-        end
-
-        private
-
-        # get root domain
-        def get_domain_from_host(env)
-          http_host = env['HTTP_HOST']
-          return nil if http_host.nil? or http_host =~ /^localhost/
-          split_host = http_host.split('.')
-          if split_host.size > 2
-            domain = ".#{split_host.drop(1).join('.')}"
-          else
-            domain = split_host.join('.')
-          end
-          domain
         end
       end
     end
