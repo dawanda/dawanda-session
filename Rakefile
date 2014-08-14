@@ -1,2 +1,2 @@
-require 'loveos/gem_tasks'
+require 'gem_tasks'
 
