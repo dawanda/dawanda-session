@@ -10,11 +10,11 @@ describe Rack::Session::Redis::RedisSessionStore do
   }
 
   let(:value) {
-    {sample_key: 'sample-value', user: {id: 'john-doe'}}
+    {:sample_key => 'sample-value', :user => {:id => 'john-doe'}}
   }
 
   let(:store) {
-    Rack::Session::Redis::RedisSessionStore.new({default_expiration: 3600, key_prefix: PREFIX})
+    Rack::Session::Redis::RedisSessionStore.new(:default_expiration => 3600, :key_prefix => PREFIX)
   }
 
   let(:redis) {
@@ -70,7 +70,7 @@ describe Rack::Session::Redis::RedisSessionStore do
 
   it 'should invoke redis.set instead of redis.setex if the expiration is less than or equal 0 (meaning no expiration)' do
     expect(redis).to receive(:set).with(PREFIX + key, Marshal.dump(value))
-    store.store(key, value, expire_after: 0)
+    store.store(key, value, :expire_after => 0)
   end
 
 end

@@ -29,7 +29,7 @@ module Rack
           redis_options = options[:redis_options] || {}
           default_expiration = options[:expire_after] || DEFAULT_EXPIRATION_SEC
           key_prefix = options[:key_prefix] || ''
-          redis_options = redis_options.merge({default_expiration: default_expiration, key_prefix: key_prefix})
+          redis_options = redis_options.merge(:default_expiration => default_expiration, :key_prefix => key_prefix)
           @store = Rack::Session::Redis::RedisSessionStore.new(redis_options)
         end
 

@@ -8,15 +8,15 @@ describe Rack::Session::Redis::SessionService do
   end
 
   let(:fake_session) do
-    {user_id: 'mallory'}
+    {:user_id => 'mallory'}
   end
 
   let(:redis_options) do
-    {host: 'example.com', port: 666, db: 1}
+    {:host => 'example.com', :port => 666, :db => 1}
   end
 
   let(:default_options) do
-    {key: '_session_key', path: '/', expire_after: 10, redis_options: redis_options, key_prefix: 'hello:prefix:'}
+    {:key => '_session_key', :path => '/', :expire_after => 10, :redis_options => redis_options, :key_prefix => 'hello:prefix:'}
   end
 
   let(:session_store) do
@@ -55,7 +55,7 @@ describe Rack::Session::Redis::SessionService do
   end
 
   it 'should support rack compliant options in a constructor and interpret them correctly' do
-    expect(Rack::Session::Redis::RedisSessionStore).to receive(:new).with(redis_options.merge(default_expiration: 10, key_prefix: 'hello:prefix:'))
+    expect(Rack::Session::Redis::RedisSessionStore).to receive(:new).with(redis_options.merge(:default_expiration => 10, :key_prefix => 'hello:prefix:'))
     Rack::Session::Redis::SessionService.new(nil, default_options)
   end
 
