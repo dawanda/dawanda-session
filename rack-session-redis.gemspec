@@ -24,4 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'loveos-common'
   spec.add_dependency 'rack'
   spec.add_dependency 'redis'
+  spec.add_dependency 'dawanda-statsd-client'
 end
