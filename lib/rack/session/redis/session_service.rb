@@ -18,6 +18,7 @@ module Rack
       # path: '/',
       # expire_after: 3600,
       # redis_options: {host: 'redis-master.example.com', port: 6379, db: 13},
+      # statsd_host: 'statsd:8125',
       # key_prefix: 'my:session:'
       #
       # You can use all options supported by Rack::Session::Abstract::ID.
@@ -26,11 +27,13 @@ module Rack
 
         # default session expiration time
         DEFAULT_EXPIRATION_SEC = 60 * 60
+        # default statsd host:port
+        DEFAULT_STATSD_HOST = 'localhost:8125'
 
         def initialize(app, options = {})
           super
           redis_options = options[:redis_options] || {}
-          statsd_client(options[:statsd_options] || 'localhost:8125')
+          statsd_client(options[:statsd_host] || DEFAULT_STATSD_HOST)
           default_expiration = options[:expire_after] || DEFAULT_EXPIRATION_SEC
           key_prefix = options[:key_prefix] || ''
           redis_options = redis_options.merge(:default_expiration => default_expiration, :key_prefix => key_prefix)

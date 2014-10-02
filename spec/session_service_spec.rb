@@ -59,6 +59,11 @@ describe Rack::Session::Redis::SessionService do
     Rack::Session::Redis::SessionService.new(nil, default_options)
   end
 
+  it 'should create a statsd client on initialization' do
+    expect(Statsd::Client).to receive(:new).with('localhost', 8125)
+    Rack::Session::Redis::SessionService.new(nil, default_options)
+  end
+
   it 'should throw exception on session collision' do
     allow(session_store).to receive(:create).and_return(false)
     allow(session_store).to receive(:load).and_return(nil)
