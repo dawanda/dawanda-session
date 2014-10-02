@@ -34,7 +34,7 @@ describe Rack::Session::Redis::StatsCollector do
   it 'should measure the time of invocation' do
     expect(client).to receive(:statsd_client).and_return(statsd_client)
     duration = 1000
-    expect(statsd_client).to receive(:timing).with(Rack::Session::Redis::StatsCollector::AVG_REQUEST_TIME, be_between(1000, 2000))
+    expect(statsd_client).to receive(:timing).with(Rack::Session::Redis::StatsCollector::REQUEST_DURATION, be_between(1000, 2000))
 
     client.with_stats do
       sleep(1)
