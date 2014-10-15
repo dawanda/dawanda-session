@@ -56,6 +56,7 @@ module Rack
                 raise "Session collision on '#{sid.inspect}'"
               end
             end
+            session[:_dawanda_name].force_encoding(Encoding::UTF_8) if session[:_dawanda_name]
             [sid, session]
           end
         end
@@ -63,6 +64,7 @@ module Rack
         #override
         def set_session(env, sid, session, options)
           with_stats do
+            session[:_dawanda_name].force_encoding(Encoding::UTF_8) if session[:_dawanda_name]
             # sid key name which stores the session id inside a session object; backward compatibility with identity
             session[:_dawanda_sid] = sid unless session.empty?
             @store.store(sid, session, options)
