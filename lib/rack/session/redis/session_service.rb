@@ -56,7 +56,7 @@ module Rack
                 raise "Session collision on '#{sid.inspect}'"
               end
             end
-            session[:_dawanda_name].force_encoding(Encoding::UTF_8) if session[:_dawanda_name]
+            force_utf8_encoding(session)
             [sid, session]
           end
         end
@@ -64,7 +64,6 @@ module Rack
         #override
         def set_session(env, sid, session, options)
           with_stats do
-            session[:_dawanda_name].force_encoding(Encoding::UTF_8) if session[:_dawanda_name]
             # sid key name which stores the session id inside a session object; backward compatibility with identity
             session[:_dawanda_sid] = sid unless session.empty?
             @store.store(sid, session, options)
@@ -77,6 +76,17 @@ module Rack
           with_stats do
             @store.invalidate(sid)
             generate_sid unless options[:drop]
+          end
+        end
+
+        # force utf8 encoding of every string in the hash
+        def force_utf8_encoding(h)
+          h.each_value do |v|
+            if v.kind_of? String
+              v.force_encoding('UTF-8')
+            elsif v.kind_of? Hash
+              force_utf8_encoding(v)
+            end
           end
         end
       end
