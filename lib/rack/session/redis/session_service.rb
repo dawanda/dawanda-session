@@ -82,12 +82,13 @@ module Rack
         private
 
         # force utf8 encoding for all of the strings inside a hash
-        def force_utf8_encoding(h)
+        def force_utf8_encoding(h, level = 0)
+          return if level > 10 # protection from recursive hashes (hopefully we don't have more than 10 levels of nesting)
           h.each_value do |v|
             if v.kind_of? String
               v.force_encoding('UTF-8')
             elsif v.kind_of? Hash
-              force_utf8_encoding(v)
+              force_utf8_encoding(v, level + 1)
             end
           end
         end
