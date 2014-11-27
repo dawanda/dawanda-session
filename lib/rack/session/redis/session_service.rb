@@ -26,7 +26,7 @@ module Rack
         include StatsCollector
 
         # default session expiration time
-        DEFAULT_EXPIRATION_SEC = 60 * 60
+        DEFAULT_EXPIRATION_SEC = 24 * 60 * 60 # 24 hours
         # default statsd host:port
         DEFAULT_STATSD_HOST = 'localhost:8125'
 
