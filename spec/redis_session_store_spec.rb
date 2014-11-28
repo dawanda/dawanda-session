@@ -73,4 +73,10 @@ describe Rack::Session::Redis::RedisSessionStore do
     store.store(key, value, :expire_after => 0)
   end
 
+  it 'should set default expiration if :expire_after option not specified' do
+    store = Rack::Session::Redis::RedisSessionStore.new(:default_expiration => 1234, :key_prefix => PREFIX)
+    expect(redis).to receive(:setex).with(anything, 1234, anything)
+    store.store(key, value)
+  end
+
 end
