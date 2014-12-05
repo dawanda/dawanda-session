@@ -1,4 +1,4 @@
-require 'redis/errors'
+require 'redis'
 require 'statsd/client'
 
 module Rack
