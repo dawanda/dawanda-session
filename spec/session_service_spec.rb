@@ -1,5 +1,6 @@
 require 'rack/session/redis/session_service'
 require 'rack/session/redis/redis_session_store'
+require 'rack'
 
 describe Rack::Session::Redis::SessionService do
 
@@ -33,6 +34,18 @@ describe Rack::Session::Redis::SessionService do
     allow(session_store).to receive(:load).and_return(fake_session)
     allow(session_store).to receive(:exists?).and_return(false)
     allow(session_store).to receive(:invalidate).and_return(fake_session)
+  end
+
+  it 'should take the session from the Authorization header if not found in the cookie' do
+    session_service = Rack::Session::Redis::SessionService.new(nil, { key: 'foobar', cookie_only: false })
+    expect(
+      session_service.extract_session_id({
+        'HTTP_AUTHORIZATION' => 'foobar 8s7dg98dsa7ft087',
+        'QUERY_STRING'       => '',
+        'REQUEST_METHOD'     => 'GET',
+        'rack.input'         => []
+      })
+    ).to eq('8s7dg98dsa7ft087')
   end
 
   it 'should check if the generated sid is not present in the underlying store' do
