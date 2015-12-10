@@ -118,5 +118,34 @@ describe Rack::Session::Redis::RedisSessionStore do
         expect(store.invalidate('foo')).to be_nil
       end
     end
+
+    context 'when Bugsnag is defined' do
+      around do |example|
+        begin
+          class Bugsnag; end
+          example.run
+        ensure
+          Object.send(:remove_const, :Bugsnag)
+        end
+      end
+
+      [:exists?, :load, :invalidate].each do |method|
+        describe method do
+          it 'logs Redis exceptions to Bugsnag' do
+            expect(Bugsnag).to receive(:notify).with an_instance_of(::Redis::BaseError)
+            store.send(method, 'foo')
+          end
+        end
+      end
+
+      [:store, :create].each do |method|
+        describe method do
+          it 'logs Redis exceptions to Bugsnag' do
+            expect(Bugsnag).to receive(:notify).with an_instance_of(::Redis::BaseError)
+            store.send(method, 'foo', { foo: 'bar' })
+          end
+        end
+      end
+    end
   end
 end
