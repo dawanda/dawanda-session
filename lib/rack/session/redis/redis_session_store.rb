@@ -11,8 +11,8 @@ module Rack
         def initialize(options)
           raise ArgumentError, 'No :default_expiration value provided' unless options[:default_expiration]
           @default_expiration = options[:default_expiration]
-          @key_prefix = options[:key_prefix] || ''
-          @redis = ::Redis.new(options)
+          @key_prefix         = options[:key_prefix] || ''
+          @redis              = options[:redis] || ::Redis.new(options)
         end
 
         # Determine if a key exists.
