@@ -1,15 +1,16 @@
 require 'rack/session/redis/session_service'
 require 'rack/session/redis/redis_session_store'
 require 'rack'
+require 'securerandom'
 
 describe Rack::Session::Redis::SessionService do
 
   let(:sid) do
-    session_service.generate_sid
+    SecureRandom.hex(32)
   end
 
   let(:fake_session) do
-    {:user_id => 'mallory'}
+    {:user_id => 'mallory', :_dawanda_sid => sid}
   end
 
   let(:redis_options) do
@@ -87,6 +88,20 @@ describe Rack::Session::Redis::SessionService do
     expect(session_store).to receive(:invalidate).with(sid)
     new_sid = session_service.destroy_session(nil, sid, {})
     expect(new_sid).to_not eq(sid)
+  end
+
+  it 'raises SessionMismatchError if _dawanda_sid inside the session does not match session id' do
+    allow(session_store).to receive(:load).with(sid).and_return(foo: 'bar', _dawanda_sid: 'wrong-session-id')
+    expect {
+      session_service.get_session(nil, sid)
+    }.to raise_error(Rack::Session::Redis::SessionMismatchError)
+  end
+
+  it 'does not raise SessionMismatchError if session is empty' do
+    allow(session_store).to receive(:load).with(sid).and_return({})
+    expect {
+      session_service.get_session(nil, sid)
+    }.not_to raise_error
   end
 
 end
