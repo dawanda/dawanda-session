@@ -92,7 +92,7 @@ module Rack
 
         private def assert_session_match!(session_id, session)
           return if session.empty?
-          if session[:_dawanda_sid] != session_id
+          if session[:_dawanda_sid] && session[:_dawanda_sid] != session_id
             raise SessionMismatchError.new("#{session_id.inspect} does not match #{session[:_dawanda_sid].inspect}")
           end
         end
