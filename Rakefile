@@ -1,2 +1,2 @@
-require 'gem_helper'
+require 'loveos/gem_helper'
 LoveOS::GemHelper.install_tasks

@@ -13,16 +13,15 @@ describe Rack::Session::Redis::RedisSessionStore do
     {:sample_key => 'sample-value', :user => {:id => 'john-doe'}}
   }
 
-  let(:store) {
-    Rack::Session::Redis::RedisSessionStore.new(:default_expiration => 3600, :key_prefix => PREFIX)
-  }
-
   let(:redis) {
     double(:redis_instance)
   }
 
+  let(:store) {
+    Rack::Session::Redis::RedisSessionStore.new(:default_expiration => 3600, :key_prefix => PREFIX, :redis => redis)
+  }
+
   before do
-    allow(Redis).to receive(:new).and_return(redis)
     allow(redis).to receive(:exists).and_return(false)
     allow(redis).to receive(:get).and_return(Marshal.dump(value))
     allow(redis).to receive(:setnx).and_return(true)
@@ -74,7 +73,7 @@ describe Rack::Session::Redis::RedisSessionStore do
   end
 
   it 'should set default expiration if :expire_after option not specified' do
-    store = Rack::Session::Redis::RedisSessionStore.new(:default_expiration => 1234, :key_prefix => PREFIX)
+    store = Rack::Session::Redis::RedisSessionStore.new(:default_expiration => 1234, :key_prefix => PREFIX, redis: redis)
     expect(redis).to receive(:setex).with(anything, 1234, anything)
     store.store(key, value)
   end

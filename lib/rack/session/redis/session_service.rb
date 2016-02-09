@@ -60,7 +60,9 @@ module Rack
         #override
         def get_session(env, sid)
           with_stats do
-            unless sid && session = @store.load(sid)
+            if sid && session = @store.load(sid)
+              assert_session_match!(sid, session)
+            else
               sid, session = generate_sid, {}
               unless @store.create(sid, session)
                 raise "Session collision on '#{sid.inspect}'"
@@ -87,7 +89,16 @@ module Rack
             generate_sid unless options[:drop]
           end
         end
+
+        private def assert_session_match!(session_id, session)
+          return if session.empty?
+          if session[:_dawanda_sid] && session[:_dawanda_sid] != session_id
+            raise SessionMismatchError.new("#{session_id.inspect} does not match #{session[:_dawanda_sid].inspect}")
+          end
+        end
       end
+
+      class SessionMismatchError < StandardError; end
     end
   end
 end
