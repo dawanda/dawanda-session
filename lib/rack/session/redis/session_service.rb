@@ -60,7 +60,7 @@ module Rack
         #override
         def get_session(env, sid)
           with_stats do
-            if sid && session = @store.load(sid)
+            if sid && sid.size > 20 && session = @store.load(sid)
               assert_session_match!(sid, session)
             else
               sid, session = generate_sid, {}
