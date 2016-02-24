@@ -104,4 +104,11 @@ describe Rack::Session::Redis::SessionService do
     }.not_to raise_error
   end
 
+  it 'regenerate a new session ID if the given one is too short' do
+    allow(session_store).to receive(:load).with(sid).and_return({})
+    allow(session_store).to receive(:create).and_return(true)
+    sid, session = session_service.get_session(nil, 'abcd')
+    expect(sid).not_to eq('abcd')
+  end
+
 end
