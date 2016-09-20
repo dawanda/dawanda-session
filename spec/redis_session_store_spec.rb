@@ -78,4 +78,73 @@ describe Rack::Session::Redis::RedisSessionStore do
     store.store(key, value)
   end
 
+  context 'when Redis is down' do
+    before do
+      allow(redis).to receive(:exists) { raise Redis::BaseError }
+      allow(redis).to receive(:get) { raise Redis::BaseError }
+      allow(redis).to receive(:set) { raise Redis::BaseError }
+      allow(redis).to receive(:setex) { raise Redis::BaseError }
+      allow(redis).to receive(:setnx) { raise Redis::BaseError }
+      allow(redis).to receive(:del) { raise Redis::BaseError }
+    end
+
+    describe '#exists?' do
+      it 'returns false' do
+        expect(store.exists?('foo')).to eq(false)
+      end
+    end
+
+    describe '#load' do
+      it 'returns an empty session hash, marked as fake' do
+        expect(store.load('foo')).to eq({ dummy: true })
+      end
+    end
+
+    describe '#store' do
+      it 'returns nil' do
+        expect(store.store('foo', { foo: 'bar' })).to be_nil
+      end
+    end
+
+    describe '#create' do
+      it 'returns nil' do
+        expect(store.create('foo', { foo: 'bar' })).to be_nil
+      end
+    end
+
+    describe '#invalidate' do
+      it 'returns nil' do
+        expect(store.invalidate('foo')).to be_nil
+      end
+    end
+
+    context 'when Bugsnag is defined' do
+      around do |example|
+        begin
+          class Bugsnag; end
+          example.run
+        ensure
+          Object.send(:remove_const, :Bugsnag)
+        end
+      end
+
+      [:exists?, :load, :invalidate].each do |method|
+        describe method do
+          it 'logs Redis exceptions to Bugsnag' do
+            expect(Bugsnag).to receive(:notify).with an_instance_of(::Redis::BaseError)
+            store.send(method, 'foo')
+          end
+        end
+      end
+
+      [:store, :create].each do |method|
+        describe method do
+          it 'logs Redis exceptions to Bugsnag' do
+            expect(Bugsnag).to receive(:notify).with an_instance_of(::Redis::BaseError)
+            store.send(method, 'foo', { foo: 'bar' })
+          end
+        end
+      end
+    end
+  end
 end

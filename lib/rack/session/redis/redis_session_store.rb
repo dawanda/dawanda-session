@@ -20,7 +20,9 @@ module Rack
         # @param [String] key
         # @return [Boolean]
         def exists?(key)
-          @redis.exists(prefix(key))
+          with_fallback(false) do
+            @redis.exists(prefix(key))
+          end
         end
 
         # Get the value of a key. Updates expiration time.
@@ -28,9 +30,11 @@ module Rack
         # @param [String] key
         # @return [String]
         def load(key)
-          redis_key = prefix(key)
-          value = @redis.get(redis_key)
-          Marshal.load(value) if value
+          with_fallback({ dummy: true }) do
+            redis_key = prefix(key)
+            value = @redis.get(redis_key)
+            Marshal.load(value) if value
+          end
         end
 
         # Sets key to hold a given value and set key TTL.
@@ -40,15 +44,17 @@ module Rack
         # @param [Hash] options
         # @return [String] provided value
         def store(key, value, options = {})
-          expiration = options[:expire_after] || @default_expiration
-          value = Marshal.dump(value)
-          redis_key = prefix(key)
-          if expiration > 0
-            @redis.setex(redis_key, expiration, value)
-          else
-            @redis.set(redis_key, value)
+          with_fallback(nil) do
+            expiration = options[:expire_after] || @default_expiration
+            value = Marshal.dump(value)
+            redis_key = prefix(key)
+            if expiration > 0
+              @redis.setex(redis_key, expiration, value)
+            else
+              @redis.set(redis_key, value)
+            end
+            value
           end
-          value
         end
 
         # Set the value of a key, only if the key does not exist.
@@ -57,9 +63,11 @@ module Rack
         # @param [String] value
         # @return [Boolean] whether the key was set or not
         def create(key, value)
-          redis_key = prefix(key)
-          value = Marshal.dump(value)
-          @redis.setnx(redis_key, value)
+          with_fallback(nil) do
+            redis_key = prefix(key)
+            value = Marshal.dump(value)
+            @redis.setnx(redis_key, value)
+          end
         end
 
         # Delete session key.
@@ -67,16 +75,23 @@ module Rack
         # @param [String] key
         # @return [String] deleted value or nil if key doesn't exist
         def invalidate(key)
-          redis_key = prefix(key)
-          if value = @redis.get(redis_key)
-            @redis.del(redis_key)
-            Marshal.load(value)
+          with_fallback(nil) do
+            redis_key = prefix(key)
+            if value = @redis.get(redis_key)
+              @redis.del(redis_key)
+              Marshal.load(value)
+            end
           end
         end
 
-        private
+        private def with_fallback(fallback_return)
+          yield
+        rescue ::Redis::BaseError => e
+          Bugsnag.notify(e) if Object.const_defined?('Bugsnag')
+          fallback_return
+        end
 
-        def prefix(key)
+        private def prefix(key)
           unless key.start_with?(@key_prefix)
             @key_prefix + key
           else
