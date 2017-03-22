@@ -40,12 +40,12 @@ describe Rack::Session::Redis::SessionService do
   it 'should take the session from the Authorization header if not found in the cookie' do
     session_service = Rack::Session::Redis::SessionService.new(nil, { key: 'foobar', cookie_only: false })
     expect(
-      session_service.extract_session_id({
+      session_service.extract_session_id(Rack::Request.new({
         'HTTP_AUTHORIZATION' => 'foobar 8s7dg98dsa7ft087',
         'QUERY_STRING'       => '',
         'REQUEST_METHOD'     => 'GET',
         'rack.input'         => []
-      })
+      }))
     ).to eq('8s7dg98dsa7ft087')
   end
 
