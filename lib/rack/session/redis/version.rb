@@ -1,7 +1,7 @@
 module Rack
   module Session
     module Redis
-      VERSION = "0.0.20"
+      VERSION = '1.0.0'
     end
   end
 end
