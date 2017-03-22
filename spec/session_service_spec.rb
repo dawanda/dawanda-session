@@ -56,14 +56,14 @@ describe Rack::Session::Redis::SessionService do
 
   it 'should create new empty session and new session id if session_id does not exist' do
     allow(session_store).to receive(:load).and_return(nil)
-    id, session = session_service.get_session(nil, sid)
+    id, session = session_service.find_session(nil, sid)
     expect(id).not_to eq(sid)
     expect(session).to eq({})
   end
 
   it 'should return existing session for a given id' do
     expect(session_store).to receive(:load).with(sid).and_return(fake_session)
-    id, session = session_service.get_session(nil, sid)
+    id, session = session_service.find_session(nil, sid)
     expect(id).to eq(sid)
     expect(session).to eq(fake_session)
   end
@@ -81,34 +81,33 @@ describe Rack::Session::Redis::SessionService do
   it 'should throw exception on session collision' do
     allow(session_store).to receive(:create).and_return(false)
     allow(session_store).to receive(:load).and_return(nil)
-    expect { session_service.get_session(nil, sid) }.to raise_error RuntimeError
+    expect { session_service.find_session(nil, sid) }.to raise_error RuntimeError
   end
 
-  it 'should destroy session and return new session id' do
+  it 'should delete session and return new session id' do
     expect(session_store).to receive(:invalidate).with(sid)
-    new_sid = session_service.destroy_session(nil, sid, {})
+    new_sid = session_service.delete_session(nil, sid, {})
     expect(new_sid).to_not eq(sid)
   end
 
   it 'raises SessionMismatchError if _dawanda_sid inside the session does not match session id' do
     allow(session_store).to receive(:load).with(sid).and_return(foo: 'bar', _dawanda_sid: 'wrong-session-id')
     expect {
-      session_service.get_session(nil, sid)
+      session_service.find_session(nil, sid)
     }.to raise_error(Rack::Session::Redis::SessionMismatchError)
   end
 
   it 'does not raise SessionMismatchError if session is empty' do
     allow(session_store).to receive(:load).with(sid).and_return({})
     expect {
-      session_service.get_session(nil, sid)
+      session_service.find_session(nil, sid)
     }.not_to raise_error
   end
 
   it 'regenerate a new session ID if the given one is too short' do
     allow(session_store).to receive(:load).with(sid).and_return({})
     allow(session_store).to receive(:create).and_return(true)
-    sid, session = session_service.get_session(nil, 'abcd')
+    sid, session = session_service.find_session(nil, 'abcd')
     expect(sid).not_to eq('abcd')
   end
-
 end

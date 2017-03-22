@@ -21,8 +21,8 @@ module Rack
       # statsd_host: 'statsd:8125',
       # key_prefix: 'my:session:'
       #
-      # You can use all options supported by Rack::Session::Abstract::ID.
-      class SessionService < ::Rack::Session::Abstract::ID
+      # You can use all options supported by Rack::Session::Abstract::Persited.
+      class SessionService < ::Rack::Session::Abstract::Persisted
         include StatsCollector
 
         # default session expiration time
@@ -58,7 +58,7 @@ module Rack
         end
 
         #override
-        def get_session(env, sid)
+        def find_session(env, sid)
           with_stats do
             if sid && sid.size > 20 && session = @store.load(sid)
               assert_session_match!(sid, session)
@@ -73,7 +73,7 @@ module Rack
         end
 
         #override
-        def set_session(env, sid, session, options)
+        def write_session(env, sid, session, options)
           with_stats do
             # sid key name which stores the session id inside a session object; backward compatibility with identity
             session[:_dawanda_sid] = sid unless session.empty?
@@ -83,7 +83,7 @@ module Rack
         end
 
         #override
-        def destroy_session(env, sid, options)
+        def delete_session(env, sid, options)
           with_stats do
             @store.invalidate(sid)
             generate_sid unless options[:drop]
