@@ -10,7 +10,7 @@ You can use all options supported by *Rack::Session::Abstract::ID*.
 
 Add this line to your application's Gemfile:
 
-    gem 'rack-session-redis'
+    gem 'loveos-rack-session-redis'
 
 And then execute:
 
@@ -18,12 +18,12 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install rack-session-redis
+    $ gem install loveos-rack-session-redis
 
 ## Usage
 
 ```
-use Rack::Session::Redis::SessionService, 
+use Rack::Session::Redis::SessionService,
     key: 'my_session_key',
     domain: 'example.com',
     path: '/',
