@@ -49,7 +49,7 @@ module Rack
           else
             @redis.set(redis_key, value)
           end
-          store_user_session(user_id, redis_key)
+          store_user_session(user_id, redis_key) unless user_id.nil?
           value
         end
 

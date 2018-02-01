@@ -83,5 +83,14 @@ describe Rack::Session::Redis::RedisSessionStore do
       expect(redis).to receive(:sadd).with("dawanda:user_sessions:#{user_id}", anything)
       store.store(key, value)
     end
+
+    context 'nonexistant user id' do
+      let(:value) { { '_dawanda_user_id' => nil } }
+
+      it 'does not store the secondary index' do
+        expect(redis).not_to receive(:sadd)
+        store.store(key, value)
+      end
+    end
   end
 end
