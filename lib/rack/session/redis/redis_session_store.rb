@@ -41,6 +41,7 @@ module Rack
         # @return [String] provided value
         def store(key, value, options = {})
           expiration = options[:expire_after] || @default_expiration
+          user_id = value['_dawanda_user_id']
           value = Marshal.dump(value)
           redis_key = prefix(key)
           if expiration > 0
@@ -48,6 +49,7 @@ module Rack
           else
             @redis.set(redis_key, value)
           end
+          store_user_session(user_id, redis_key)
           value
         end
 
@@ -82,6 +84,10 @@ module Rack
           else
             key
           end
+        end
+
+        def store_user_session(user_id, session_key)
+          @redis.sadd("dawanda:user_sessions:#{user_id}", session_key)
         end
       end
     end
