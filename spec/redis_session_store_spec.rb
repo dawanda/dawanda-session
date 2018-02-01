@@ -9,9 +9,8 @@ describe Rack::Session::Redis::RedisSessionStore do
     SecureRandom.hex
   }
 
-  let(:value) {
-    {:sample_key => 'sample-value', :user => {:id => 'john-doe'}}
-  }
+  let(:user_id) { 13 }
+  let(:value) { { '_dawanda_user_id' => user_id } }
 
   let(:redis) {
     double(:redis_instance)
@@ -26,6 +25,7 @@ describe Rack::Session::Redis::RedisSessionStore do
     allow(redis).to receive(:get).and_return(Marshal.dump(value))
     allow(redis).to receive(:setnx).and_return(true)
     allow(redis).to receive(:setex)
+    allow(redis).to receive(:sadd)
     allow(redis).to receive(:set)
     allow(redis).to receive(:del).and_return(1)
   end
@@ -78,4 +78,19 @@ describe Rack::Session::Redis::RedisSessionStore do
     store.store(key, value)
   end
 
+  describe '#store' do
+    it 'stores a secondary user id index' do
+      expect(redis).to receive(:sadd).with("dawanda:user_sessions:#{user_id}", anything)
+      store.store(key, value)
+    end
+
+    context 'nonexistant user id' do
+      let(:value) { { '_dawanda_user_id' => nil } }
+
+      it 'does not store the secondary index' do
+        expect(redis).not_to receive(:sadd)
+        store.store(key, value)
+      end
+    end
+  end
 end
