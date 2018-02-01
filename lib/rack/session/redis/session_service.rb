@@ -48,10 +48,10 @@ module Rack
         end
 
         #override
-        def extract_session_id(request)
+        def extract_session_id(env)
           sid = super
           # Take sid from Authorization header
-          if sid.nil? && !@cookie_only && auth = request.env['HTTP_AUTHORIZATION']
+          if sid.nil? && !@cookie_only && auth = env['HTTP_AUTHORIZATION']
             sid = (auth.match(/#{@key} (\w+)/) || [])[1]
           end
           sid
