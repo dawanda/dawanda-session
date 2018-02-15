@@ -41,7 +41,7 @@ module Rack
         end
 
         def generate_sid
-          loop do
+          while true do
             sid = super
             break sid unless @store.exists?(sid)
           end
